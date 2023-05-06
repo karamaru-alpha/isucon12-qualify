@@ -59,6 +59,10 @@ regexp = '^(GET|HEAD) /api/admin/tenants/billing\?before=.*'
 name = "GET /api/admin/tenants/billing?before=*"
 
 [[bundle]]
+regexp = '^(GET|HEAD) /api/player/player/.*'
+name = "GET /api/player/player/*"
+
+[[bundle]]
 regexp = '^(GET|HEAD) /stylesheets/'
 name = "stylesheets"
 
