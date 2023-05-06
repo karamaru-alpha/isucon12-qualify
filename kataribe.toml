@@ -51,8 +51,8 @@ duration_index = 10
 # You can aggregate requests by regular expression
 # For overview of regexp syntax: https://golang.org/pkg/regexp/syntax/
 [[bundle]]
-regexp = '^(GET|HEAD) /memo/[0-9]+\b'
-name = "get memo"
+regexp = 'GET /api/player/competition/.{8}/ranking'
+name = "GET /api/player/competition/*/ranking"
 
 [[bundle]]
 regexp = '^(GET|HEAD) /stylesheets/'
@@ -61,10 +61,6 @@ name = "stylesheets"
 [[bundle]]
 regexp = '^(GET|HEAD) /images/'
 name = "images"
-
-[[bundle]]
-regexp = 'GET /api/player/competition/.{8}/ranking'
-name = "GET /api/player/competition/*/ranking"
 
 # You can replace the part of urls which matched to your regular expressions.
 # For overview of regexp syntax: https://golang.org/pkg/regexp/syntax/
