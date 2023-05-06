@@ -8,7 +8,8 @@ CREATE TABLE competition (
   title TEXT NOT NULL,
   finished_at BIGINT NULL,
   created_at BIGINT NOT NULL,
-  updated_at BIGINT NOT NULL
+  updated_at BIGINT NOT NULL,
+  INDEX (`tenant_id`)
 );
 
 CREATE TABLE player (
@@ -17,7 +18,8 @@ CREATE TABLE player (
   display_name TEXT NOT NULL,
   is_disqualified BOOLEAN NOT NULL,
   created_at BIGINT NOT NULL,
-  updated_at BIGINT NOT NULL
+  updated_at BIGINT NOT NULL,
+  INDEX (`tenant_id`)
 );
 
 CREATE TABLE player_score (
@@ -28,5 +30,15 @@ CREATE TABLE player_score (
   score BIGINT NOT NULL,
   row_num BIGINT NOT NULL,
   created_at BIGINT NOT NULL,
-  updated_at BIGINT NOT NULL
+  updated_at BIGINT NOT NULL,
+  INDEX (`tenant_id`, `competition_id`, `player_id`)
 );
+
+DROP TABLE IF EXISTS `latest_visit_history`;
+CREATE TABLE `latest_visit_history` (
+    `tenant_id` BIGINT UNSIGNED NOT NULL,
+    `competition_id` VARCHAR(255) NOT NULL,
+    `player_id` VARCHAR(255) NOT NULL,
+    `created_at` BIGINT NOT NULL,
+    PRIMARY KEY  (`tenant_id`, `competition_id`, `player_id`)
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
