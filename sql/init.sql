@@ -5,11 +5,11 @@ ALTER TABLE id_generator AUTO_INCREMENT=2678400000;
 
 DROP TABLE IF EXISTS `latest_visit_history`;
 CREATE TABLE `latest_visit_history` (
-    `player_id` VARCHAR(255) NOT NULL,
     `tenant_id` BIGINT UNSIGNED NOT NULL,
     `competition_id` VARCHAR(255) NOT NULL,
+    `player_id` VARCHAR(255) NOT NULL,
     `created_at` BIGINT NOT NULL,
-    PRIMARY KEY  (`player_id`, `tenant_id`, `competition_id`)
+    PRIMARY KEY  (`tenant_id`, `competition_id`, `player_id`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
-INSERT INTO `latest_visit_history` SELECT player_id, tenant_id, competition_id, MIN(created_at) AS created_at FROM visit_history GROUP BY player_id, tenant_id, competition_id;
+INSERT INTO `latest_visit_history` SELECT tenant_id, competition_id, player_id, MIN(created_at) AS created_at FROM visit_history GROUP BY player_id, tenant_id, competition_id;
