@@ -1084,7 +1084,7 @@ func competitionScoreHandler(c echo.Context) error {
 		})
 	}
 
-	tx, err := adminDB.BeginTx(ctx, nil)
+	tx, err := tenantDB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
