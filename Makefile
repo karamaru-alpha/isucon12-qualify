@@ -44,7 +44,7 @@ setup:
 .PHONY: isu1
 isu1:
 	cd $(APP_PATH)
-	refresh
+	git checkout . && git clean -df .
 	git rev-parse --abbrev-ref HEAD | xargs echo "BRANCH:"
 	git rev-parse --abbrev-ref HEAD | xargs pullf
 	sudo cp my.cnf /etc/mysql/my.cnf
