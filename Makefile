@@ -46,7 +46,7 @@ isu1:
 	cd $(APP_PATH)
 	git checkout . && git clean -df .
 	git rev-parse --abbrev-ref HEAD | xargs echo "BRANCH:"
-	git rev-parse --abbrev-ref HEAD | xargs pullf
+	git fetch origin $(git rev-parse --abbrev-ref HEAD) && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
 	sudo cp my.cnf /etc/mysql/my.cnf
 	sudo cp nginx.conf /etc/nginx/nginx.conf
 	sudo cp $(APP).conf /etc/nginx/sites-enabled/$(APP).conf
