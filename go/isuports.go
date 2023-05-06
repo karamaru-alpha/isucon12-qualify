@@ -28,6 +28,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"golang.org/x/sync/singleflight"
 )
 
 const (
@@ -1311,6 +1312,8 @@ type CompetitionRankingHandlerResult struct {
 	Ranks       []CompetitionRank `json:"ranks"`
 }
 
+var flight1 singleflight.Group
+
 // 参加者向けAPI
 // GET /api/player/competition/:competition_id/ranking
 // 大会ごとのランキングを取得する
@@ -1349,19 +1352,14 @@ func competitionRankingHandler(c echo.Context) error {
 	}
 
 	now := time.Now().Unix()
-	var tenant TenantRow
-	if err := adminDB.GetContext(ctx, &tenant, "SELECT * FROM tenant WHERE id = ?", v.tenantID); err != nil {
-		return fmt.Errorf("error Select tenant: id=%d, %w", v.tenantID, err)
-	}
-
 	if _, err := adminDB.ExecContext(
 		ctx,
 		"INSERT INTO visit_history (player_id, tenant_id, competition_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-		v.playerID, tenant.ID, competitionID, now, now,
+		v.playerID, v.tenantName, competitionID, now, now,
 	); err != nil {
 		return fmt.Errorf(
 			"error Insert visit_history: playerID=%s, tenantID=%d, competitionID=%s, createdAt=%d, updatedAt=%d, %w",
-			v.playerID, tenant.ID, competitionID, now, now, err,
+			v.playerID, v.tenantID, competitionID, now, now, err,
 		)
 	}
 
@@ -1384,10 +1382,10 @@ func competitionRankingHandler(c echo.Context) error {
 		ctx,
 		&pss,
 		"SELECT a.*, b.display_name FROM player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ? ORDER BY a.row_num DESC",
-		tenant.ID,
+		v.tenantID,
 		competitionID,
 	); err != nil {
-		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, %w", tenant.ID, competitionID, err)
+		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, %w", v.tenantID, competitionID, err)
 	}
 
 	ranks := make([]CompetitionRank, 0, len(pss))
