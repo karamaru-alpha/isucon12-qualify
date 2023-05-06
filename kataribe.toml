@@ -63,7 +63,7 @@ regexp = '^(GET|HEAD) /images/'
 name = "images"
 
 [[bundle]]
-regexp = 'GET /api/player/competition/[\u\l\d]{8}/ranking'
+regexp = 'GET /api/player/competition/.{8}/ranking'
 name = "GET /api/player/competition/*/ranking"
 
 # You can replace the part of urls which matched to your regular expressions.
