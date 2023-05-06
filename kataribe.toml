@@ -63,6 +63,14 @@ regexp = '^(GET|HEAD) /api/player/player/.*'
 name = "GET /api/player/player/*"
 
 [[bundle]]
+regexp = '^POST /api/organizer/competition/.+/score'
+name = "POST /api/organizer/competition/*/score"
+
+[[bundle]]
+regexp = '^POST /api/organizer/competition/.+/finish'
+name = "POST /api/organizer/competition/*/finish"
+
+[[bundle]]
 regexp = '^(GET|HEAD) /stylesheets/'
 name = "stylesheets"
 
