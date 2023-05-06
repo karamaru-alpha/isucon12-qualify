@@ -95,3 +95,7 @@ log-nginx:
 .PHONY: log-sql
 log-sql:
 	sudo cat $(MYSQL_ERR)
+
+.PHONY: bench
+bench:
+	(cd ../bench; ./bench)
