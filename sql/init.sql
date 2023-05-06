@@ -11,4 +11,4 @@ CREATE TABLE `latest_visit_history` (
     PRIMARY KEY  (`player_id`, `tenant_id`, `competition_id`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
-INSERT INTO `latest_visit_history` SELECT player_id, MIN(t1.tenant_id), MIN(created_at) AS created_at FROM visit_history GROUP BY player_id;
+INSERT INTO `latest_visit_history` SELECT player_id, MIN(tenant_id), MIN(created_at) AS created_at FROM visit_history GROUP BY player_id;
