@@ -55,8 +55,8 @@ regexp = 'GET /api/player/competition/.{8}/ranking'
 name = "GET /api/player/competition/*/ranking"
 
 [[bundle]]
-regexp = 'GET /api/admin/tenants/billing?before=\d+'
-name = "GET /api/player/competition/*/ranking"
+regexp = 'GET /api/admin/tenants/billing?before=[0-9]+'
+name = "GET /api/admin/tenants/billing?before=*"
 
 [[bundle]]
 regexp = '^(GET|HEAD) /stylesheets/'
