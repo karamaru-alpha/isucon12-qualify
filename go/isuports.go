@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	log2 "log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -137,9 +138,20 @@ func Run() {
 	e.Debug = true
 	e.Logger.SetLevel(log.DEBUG)
 
+	log2.SetFlags(log2.Lshortfile)
+	logfile, err := os.OpenFile("/var/log/go.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		panic("cannnot open test.log:" + err.Error())
+	}
+	defer logfile.Close()
+	log.SetOutput(logfile)
+	log.Print("main!!!!")
+	e.Logger.SetOutput(logfile)
+	e.Logger.SetLevel(log.ERROR)
+
 	var (
 		sqlLogger io.Closer
-		err       error
+		//err       error
 	)
 	// sqliteのクエリログを出力する設定
 	// 環境変数 ISUCON_SQLITE_TRACE_FILE を設定すると、そのファイルにクエリログをJSON形式で出力する
