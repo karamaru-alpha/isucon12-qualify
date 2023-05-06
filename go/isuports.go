@@ -135,7 +135,6 @@ func SetCacheControlPrivate(next echo.HandlerFunc) echo.HandlerFunc {
 // Run は cmd/isuports/main.go から呼ばれるエントリーポイントです
 func Run() {
 	e := echo.New()
-	e.Logger.SetLevel(log.OFF)
 
 	log2.SetFlags(log2.Lshortfile)
 	logfile, err := os.OpenFile("/var/log/go.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -146,7 +145,7 @@ func Run() {
 	log.SetOutput(logfile)
 	log.Print("main!!!!")
 	e.Logger.SetOutput(logfile)
-	e.Logger.SetLevel(log.ERROR)
+	e.Logger.SetLevel(log.OFF)
 
 	var (
 		sqlLogger io.Closer
