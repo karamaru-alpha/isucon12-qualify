@@ -55,7 +55,7 @@ regexp = 'GET /api/player/competition/.{8}/ranking'
 name = "GET /api/player/competition/*/ranking"
 
 [[bundle]]
-regexp = 'GET /api/admin/tenants/billing?before=[0-9]+'
+regexp = 'GET /api/admin/tenants/billing?before=[0-9]+\b'
 name = "GET /api/admin/tenants/billing?before=*"
 
 [[bundle]]
