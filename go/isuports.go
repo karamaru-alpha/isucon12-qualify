@@ -145,7 +145,7 @@ func Run() {
 	log.SetOutput(logfile)
 	log.Print("main!!!!")
 	e.Logger.SetOutput(logfile)
-	e.Logger.SetLevel(log.OFF)
+	e.Logger.SetLevel(log.ERROR)
 
 	var (
 		sqlLogger io.Closer
@@ -161,7 +161,6 @@ func Run() {
 	}
 	defer sqlLogger.Close()
 
-	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(SetCacheControlPrivate)
 
