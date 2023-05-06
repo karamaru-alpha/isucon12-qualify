@@ -135,8 +135,7 @@ func SetCacheControlPrivate(next echo.HandlerFunc) echo.HandlerFunc {
 // Run は cmd/isuports/main.go から呼ばれるエントリーポイントです
 func Run() {
 	e := echo.New()
-	e.Debug = true
-	e.Logger.SetLevel(log.DEBUG)
+	e.Logger.SetLevel(log.OFF)
 
 	log2.SetFlags(log2.Lshortfile)
 	logfile, err := os.OpenFile("/var/log/go.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -1368,7 +1367,6 @@ func competitionRankingHandler(c echo.Context) error {
 	if _, err := adminDB.ExecContext(
 		ctx,
 		"INSERT INTO latest_visit_history (player_id, tenant_id, competition_id, created_at) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `created_at` = ?",
-
 		v.playerID, tenant.ID, competitionID, now, now,
 	); err != nil {
 		return fmt.Errorf(
