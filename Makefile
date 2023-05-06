@@ -44,9 +44,9 @@ setup:
 .PHONY: isu1
 isu1:
 	cd $(APP_PATH)
-	git checkout . && git clean -df .
+	refresh
 	git rev-parse --abbrev-ref HEAD | xargs echo "BRANCH:"
-	git rev-parse --abbrev-ref HEAD | xargs git pull origin
+	git rev-parse --abbrev-ref HEAD | xargs pullf
 	sudo cp my.cnf /etc/mysql/my.cnf
 	sudo cp nginx.conf /etc/nginx/nginx.conf
 	sudo cp $(APP).conf /etc/nginx/sites-enabled/$(APP).conf
