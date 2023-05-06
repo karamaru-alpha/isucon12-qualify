@@ -431,6 +431,8 @@ type PlayerScoreRow struct {
 	RowNum        int64  `db:"row_num"`
 	CreatedAt     int64  `db:"created_at"`
 	UpdatedAt     int64  `db:"updated_at"`
+
+	DisplayName string `db:"display_name"`
 }
 
 // 排他ロックのためのファイル名を生成する
@@ -1381,12 +1383,13 @@ func competitionRankingHandler(c echo.Context) error {
 	if err := tenantDB.SelectContext(
 		ctx,
 		&pss,
-		"SELECT * FROM player_score WHERE tenant_id = ? AND competition_id = ? ORDER BY row_num DESC",
+		"SELECT a.*, b.display_name FROM player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ? ORDER BY a.row_num DESC",
 		tenant.ID,
 		competitionID,
 	); err != nil {
 		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, %w", tenant.ID, competitionID, err)
 	}
+
 	ranks := make([]CompetitionRank, 0, len(pss))
 	scoredPlayerSet := make(map[string]struct{}, len(pss))
 	for _, ps := range pss {
@@ -1396,14 +1399,14 @@ func competitionRankingHandler(c echo.Context) error {
 			continue
 		}
 		scoredPlayerSet[ps.PlayerID] = struct{}{}
-		p, err := retrievePlayer(ctx, tenantDB, ps.PlayerID)
-		if err != nil {
-			return fmt.Errorf("error retrievePlayer: %w", err)
-		}
+		//p, err := retrievePlayer(ctx, tenantDB, ps.PlayerID)
+		//if err != nil {
+		//	return fmt.Errorf("error retrievePlayer: %w", err)
+		//}
 		ranks = append(ranks, CompetitionRank{
 			Score:             ps.Score,
-			PlayerID:          p.ID,
-			PlayerDisplayName: p.DisplayName,
+			PlayerID:          ps.PlayerID,
+			PlayerDisplayName: ps.DisplayName,
 			RowNum:            ps.RowNum,
 		})
 	}
