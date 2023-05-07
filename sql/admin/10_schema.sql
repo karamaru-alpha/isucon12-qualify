@@ -46,3 +46,37 @@ CREATE TABLE `init_latest_visit_history` (
      `created_at` BIGINT NOT NULL,
      PRIMARY KEY (`tenant_id`, `competition_id`, `player_id`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
+
+DROP TABLE IF EXISTS `competition`;
+CREATE TABLE `competition` (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL,
+    title TEXT NOT NULL,
+    finished_at BIGINT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL,
+    INDEX (`tenant_id`)
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
+
+DROP TABLE IF EXISTS `player`;
+CREATE TABLE `player` (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    tenant_id BIGINT NOT NULL,
+    display_name TEXT NOT NULL,
+    is_disqualified BOOLEAN NOT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL,
+    INDEX (`tenant_id`)
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `player_score`;
+CREATE TABLE `player_score` (
+    tenant_id BIGINT NOT NULL,
+    competition_id VARCHAR(255) NOT NULL,
+    player_id VARCHAR(255) NOT NULL,
+    score BIGINT NOT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL,
+    PRIMARY KEY (tenant_id, competition_id, player_id)
+);

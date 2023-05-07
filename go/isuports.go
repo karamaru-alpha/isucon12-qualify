@@ -576,7 +576,7 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 	if err := tenantDB.SelectContext(
 		ctx,
 		&scoredPlayerIDs,
-		"SELECT player_id FROM latest_player_score WHERE tenant_id = ? AND competition_id = ?",
+		"SELECT player_id FROM player_score WHERE tenant_id = ? AND competition_id = ?",
 		tenantID, comp.ID,
 	); err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("error Select count player_score: tenantID=%d, competitionID=%s, %w", tenantID, competitonID, err)
@@ -1113,7 +1113,7 @@ func competitionScoreHandler(c echo.Context) error {
 
 	if _, err := tx.ExecContext(
 		ctx,
-		"DELETE FROM latest_player_score WHERE tenant_id = ? AND competition_id = ?",
+		"DELETE FROM player_score WHERE tenant_id = ? AND competition_id = ?",
 		v.tenantID,
 		competitionID,
 	); err != nil {
@@ -1131,7 +1131,7 @@ func competitionScoreHandler(c echo.Context) error {
 	}
 	if _, err = tx.ExecContext(
 		ctx,
-		"INSERT INTO latest_player_score(tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
+		"INSERT INTO player_score(tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
 		args...,
 	); err != nil {
 		return err
@@ -1257,7 +1257,7 @@ func playerHandler(c echo.Context) error {
 		ctx,
 		&pss,
 		// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
-		"SELECT * FROM latest_player_score WHERE tenant_id = ? AND player_id = ?",
+		"SELECT * FROM player_score WHERE tenant_id = ? AND player_id = ?",
 		v.tenantID,
 		p.ID,
 	); err != nil {
@@ -1382,7 +1382,7 @@ func competitionRankingHandler(c echo.Context) error {
 	if err := tenantDB.SelectContext(
 		ctx,
 		&pss,
-		"SELECT a.*, b.display_name FROM latest_player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ?",
+		"SELECT a.*, b.display_name FROM player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ?",
 		tenant.ID,
 		competitionID,
 	); err != nil {
