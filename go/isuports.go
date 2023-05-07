@@ -1,6 +1,7 @@
 package isuports
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/csv"
@@ -20,6 +21,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bytedance/sonic/decoder"
+	"github.com/bytedance/sonic/encoder"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -30,6 +33,23 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/oklog/ulid/v2"
 )
+
+type JSONSerializer struct{}
+
+func (j *JSONSerializer) Serialize(c echo.Context, i interface{}, indent string) error {
+	buf, err := encoder.Encode(i, 0)
+	if err != nil {
+		return err
+	}
+	_, err = c.Response().Write(buf)
+	return err
+}
+
+func (j *JSONSerializer) Deserialize(c echo.Context, i interface{}) error {
+	var buf bytes.Buffer
+	buf.ReadFrom(c.Request().Body)
+	return decoder.NewDecoder(buf.String()).Decode(i)
+}
 
 const (
 	tenantDBSchemaFilePath = "../sql/tenant/10_schema.sql"
@@ -121,6 +141,7 @@ func SetCacheControlPrivate(next echo.HandlerFunc) echo.HandlerFunc {
 // Run は cmd/isuports/main.go から呼ばれるエントリーポイントです
 func Run() {
 	e := echo.New()
+	e.JSONSerializer = &JSONSerializer{}
 
 	log2.SetFlags(log2.Lshortfile)
 	logfile, err := os.OpenFile("/var/log/go.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
