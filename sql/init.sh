@@ -20,7 +20,7 @@ mysql -u"$ISUCON_DB_USER" \
 rm -f ../tenant_db/*.db
 cp -r ../../initial_data/*.db ../tenant_db/
 
-#for db in ../tenant_db/*.db
-#do
-#  sqlite3 $db < latest-player-score.sql
-#done
+for db in tenant_db/*.db
+do
+  sqlite3 $db < latest-player-score.sql
+done
