@@ -888,7 +888,7 @@ func competitionsAddHandler(c echo.Context) error {
 		)
 	}
 
-	log.Print(" Add competition tenantID:" v.tenantID)
+	log.Print(" Add competition tenantID:", v.tenantID)
 
 	res := CompetitionsAddHandlerResult{
 		Competition: CompetitionDetail{
