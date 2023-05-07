@@ -576,7 +576,7 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 	if err := tenantDB.SelectContext(
 		ctx,
 		&scoredPlayerIDs,
-		"SELECT DISTINCT(player_id) FROM player_score WHERE tenant_id = ? AND competition_id = ?",
+		"SELECT player_id FROM latest_player_score WHERE tenant_id = ? AND competition_id = ?",
 		tenantID, comp.ID,
 	); err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("error Select count player_score: tenantID=%d, competitionID=%s, %w", tenantID, competitonID, err)
@@ -1113,7 +1113,7 @@ func competitionScoreHandler(c echo.Context) error {
 
 	if _, err := tx.ExecContext(
 		ctx,
-		"DELETE FROM player_score WHERE tenant_id = ? AND competition_id = ?",
+		"DELETE FROM latest_player_score WHERE tenant_id = ? AND competition_id = ?",
 		v.tenantID,
 		competitionID,
 	); err != nil {
@@ -1122,16 +1122,16 @@ func competitionScoreHandler(c echo.Context) error {
 	args := make([]interface{}, 0, len(insertPlayerSet)*8)
 	placeHolders := &strings.Builder{}
 	for _, ps := range insertPlayerSet {
-		args = append(args, ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.RowNum, ps.CreatedAt, ps.UpdatedAt)
+		args = append(args, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.CreatedAt, ps.UpdatedAt)
 		if placeHolders.Len() == 0 {
-			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?, ?, ?)")
+			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?)")
 		} else {
-			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?, ?, ?)")
+			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?)")
 		}
 	}
 	if _, err = tx.ExecContext(
 		ctx,
-		"INSERT INTO player_score(id, tenant_id, player_id, competition_id, score, row_num, created_at, updated_at) VALUES"+placeHolders.String(),
+		"INSERT INTO latest_player_score(tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
 		args...,
 	); err != nil {
 		return err
@@ -1253,24 +1253,15 @@ func playerHandler(c echo.Context) error {
 	}
 
 	pss := make([]PlayerScoreRow, 0, len(cs))
-	for _, c := range cs {
-		ps := PlayerScoreRow{}
-		if err := tenantDB.GetContext(
-			ctx,
-			&ps,
-			// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
-			"SELECT * FROM player_score WHERE tenant_id = ? AND competition_id = ? AND player_id = ? ORDER BY row_num DESC LIMIT 1",
-			v.tenantID,
-			c.ID,
-			p.ID,
-		); err != nil {
-			// 行がない = スコアが記録されてない
-			if errors.Is(err, sql.ErrNoRows) {
-				continue
-			}
-			return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, playerID=%s, %w", v.tenantID, c.ID, p.ID, err)
-		}
-		pss = append(pss, ps)
+	if err := tenantDB.SelectContext(
+		ctx,
+		&pss,
+		// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
+		"SELECT * FROM latest_player_score WHERE tenant_id = ? AND player_id = ?",
+		v.tenantID,
+		p.ID,
+	); err != nil {
+		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, playerID=%s, %w", v.tenantID, "", p.ID, err)
 	}
 
 	cMap := make(map[string]CompetitionRow, len(cs))
@@ -1280,13 +1271,9 @@ func playerHandler(c echo.Context) error {
 
 	psds := make([]PlayerScoreDetail, 0, len(pss))
 	for _, ps := range pss {
-		//comp, err := retrieveCompetition(ctx, tenantDB, ps.CompetitionID)
-		//if err != nil {
-		//	return fmt.Errorf("error retrieveCompetition: %w", err)
-		//}
 		psds = append(psds, PlayerScoreDetail{
 			CompetitionTitle: cMap[ps.CompetitionID].Title,
-			
+
 			Score: ps.Score,
 		})
 	}
@@ -1395,7 +1382,7 @@ func competitionRankingHandler(c echo.Context) error {
 	if err := tenantDB.SelectContext(
 		ctx,
 		&pss,
-		"SELECT a.*, b.display_name FROM player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ? ORDER BY a.row_num DESC",
+		"SELECT a.*, b.display_name FROM latest_player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ?",
 		tenant.ID,
 		competitionID,
 	); err != nil {
