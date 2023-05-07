@@ -1131,7 +1131,7 @@ func competitionScoreHandler(c echo.Context) error {
 	}
 	if _, err = tx.ExecContext(
 		ctx,
-		"INSERT INTO player_score(id, tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
+		"INSERT INTO latest_player_score(id, tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
 		args...,
 	); err != nil {
 		return err
