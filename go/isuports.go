@@ -1122,16 +1122,16 @@ func competitionScoreHandler(c echo.Context) error {
 	args := make([]interface{}, 0, len(insertPlayerSet)*8)
 	placeHolders := &strings.Builder{}
 	for _, ps := range insertPlayerSet {
-		args = append(args, ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.CreatedAt, ps.UpdatedAt)
+		args = append(args, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.CreatedAt, ps.UpdatedAt)
 		if placeHolders.Len() == 0 {
-			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?, ?)")
+			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?)")
 		} else {
-			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?, ?)")
+			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?)")
 		}
 	}
 	if _, err = tx.ExecContext(
 		ctx,
-		"INSERT INTO latest_player_score(id, tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
+		"INSERT INTO latest_player_score(tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
 		args...,
 	); err != nil {
 		return err
