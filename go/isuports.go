@@ -1107,6 +1107,8 @@ func competitionScoreHandler(c echo.Context) error {
 		return err
 	}
 
+	rankingCacher.Flush()
+
 	return c.JSON(http.StatusOK, SuccessResult{
 		Status: true,
 		Data:   ScoreHandlerResult{Rows: int64(len(playerScoreRows))},
@@ -1278,6 +1280,8 @@ type CompetitionRankingHandlerResult struct {
 	Ranks       []CompetitionRank `json:"ranks"`
 }
 
+var rankingCacher = InitCacher[SuccessResult]()
+
 // 参加者向けAPI
 // GET /api/player/competition/:competition_id/ranking
 // 大会ごとのランキングを取得する
@@ -1306,6 +1310,11 @@ func competitionRankingHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "competition_id is required")
 	}
 
+	cache, ok := rankingCacher.Get(CACHE_KEY)
+	if ok {
+		return c.JSON(http.StatusOK, cache)
+	}
+
 	// 大会の存在確認
 	competition, err := retrieveCompetition(ctx, tenantDB, competitionID)
 	if err != nil {
@@ -1320,17 +1329,6 @@ func competitionRankingHandler(c echo.Context) error {
 	if err := adminDB.GetContext(ctx, &tenant, "SELECT * FROM tenant WHERE id = ?", v.tenantID); err != nil {
 		return fmt.Errorf("error Select tenant: id=%d, %w", v.tenantID, err)
 	}
-
-	//if _, err := adminDB.ExecContext(
-	//	ctx,
-	//	"INSERT INTO visit_history (player_id, tenant_id, competition_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-	//	v.playerID, tenant.ID, competitionID, now, now,
-	//); err != nil {
-	//	return fmt.Errorf(
-	//		"error Insert visit_history: playerID=%s, tenantID=%d, competitionID=%s, createdAt=%d, updatedAt=%d, %w",
-	//		v.playerID, tenant.ID, competitionID, now, now, err,
-	//	)
-	//}
 
 	if _, err := adminDB.ExecContext(
 		ctx,
@@ -1371,10 +1369,6 @@ func competitionRankingHandler(c echo.Context) error {
 			continue
 		}
 		scoredPlayerSet[ps.PlayerID] = struct{}{}
-		//p, err := retrievePlayer(ctx, tenantDB, ps.PlayerID)
-		//if err != nil {
-		//	return fmt.Errorf("error retrievePlayer: %w", err)
-		//}
 		ranks = append(ranks, CompetitionRank{
 			Score:             ps.Score,
 			PlayerID:          ps.PlayerID,
@@ -1415,6 +1409,9 @@ func competitionRankingHandler(c echo.Context) error {
 			Ranks: pagedRanks,
 		},
 	}
+
+	rankingCacher.Set(CACHE_KEY, &res, -1)
+
 	return c.JSON(http.StatusOK, res)
 }
 
