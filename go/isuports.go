@@ -1092,6 +1092,19 @@ func competitionScoreHandler(c echo.Context) error {
 		})
 	}
 
+	insertPlayerSet := make(map[string]PlayerScoreRow, len(playerScoreRows)) // 実際に挿入するデータ
+
+	for _, ps := range playerScoreRows {
+		p, ok := insertPlayerSet[ps.PlayerID]
+		if ok {
+			if p.RowNum < ps.RowNum {
+				insertPlayerSet[ps.PlayerID] = ps
+			}
+		} else {
+			insertPlayerSet[ps.PlayerID] = ps
+		}
+	}
+
 	tx, err := tenantDB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -1106,11 +1119,11 @@ func competitionScoreHandler(c echo.Context) error {
 	); err != nil {
 		return fmt.Errorf("error Delete player_score: tenantID=%d, competitionID=%s, %w", v.tenantID, competitionID, err)
 	}
-	args := make([]interface{}, 0, len(playerScoreRows)*8)
+	args := make([]interface{}, 0, len(insertPlayerSet)*8)
 	placeHolders := &strings.Builder{}
-	for i, ps := range playerScoreRows {
+	for _, ps := range insertPlayerSet {
 		args = append(args, ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.RowNum, ps.CreatedAt, ps.UpdatedAt)
-		if i == 0 {
+		if placeHolders.Len() == 0 {
 			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?, ?, ?)")
 		} else {
 			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?, ?, ?)")
