@@ -576,7 +576,7 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 	if err := tenantDB.SelectContext(
 		ctx,
 		&scoredPlayerIDs,
-		"SELECT player_id FROM new_player_score WHERE tenant_id = ? AND competition_id = ?",
+		"SELECT player_id FROM latest_player_score WHERE tenant_id = ? AND competition_id = ?",
 		tenantID, comp.ID,
 	); err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("error Select count player_score: tenantID=%d, competitionID=%s, %w", tenantID, competitonID, err)
@@ -1113,7 +1113,7 @@ func competitionScoreHandler(c echo.Context) error {
 
 	if _, err := tx.ExecContext(
 		ctx,
-		"DELETE FROM new_player_score WHERE tenant_id = ? AND competition_id = ?",
+		"DELETE FROM latest_player_score WHERE tenant_id = ? AND competition_id = ?",
 		v.tenantID,
 		competitionID,
 	); err != nil {
@@ -1259,7 +1259,7 @@ func playerHandler(c echo.Context) error {
 			ctx,
 			&ps,
 			// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
-			"SELECT * FROM new_player_score WHERE tenant_id = ? AND competition_id = ? AND player_id = ? LIMIT 1",
+			"SELECT * FROM latest_player_score WHERE tenant_id = ? AND competition_id = ? AND player_id = ? LIMIT 1",
 			v.tenantID,
 			c.ID,
 			p.ID,
@@ -1395,7 +1395,7 @@ func competitionRankingHandler(c echo.Context) error {
 	if err := tenantDB.SelectContext(
 		ctx,
 		&pss,
-		"SELECT a.*, b.display_name FROM new_player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ?",
+		"SELECT a.*, b.display_name FROM latest_player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ?",
 		tenant.ID,
 		competitionID,
 	); err != nil {
