@@ -1253,7 +1253,7 @@ func playerHandler(c echo.Context) error {
 	}
 
 	pss := make([]PlayerScoreRow, 0, len(cs))
-	if err := tenantDB.GetContext(
+	if err := tenantDB.SelectContext(
 		ctx,
 		&pss,
 		// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
