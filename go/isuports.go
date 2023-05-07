@@ -1273,15 +1273,21 @@ func playerHandler(c echo.Context) error {
 		pss = append(pss, ps)
 	}
 
+	cMap := make(map[string]CompetitionRow, len(cs))
+	for _, c := range cs {
+		cMap[c.ID] = c
+	}
+
 	psds := make([]PlayerScoreDetail, 0, len(pss))
 	for _, ps := range pss {
-		comp, err := retrieveCompetition(ctx, tenantDB, ps.CompetitionID)
-		if err != nil {
-			return fmt.Errorf("error retrieveCompetition: %w", err)
-		}
+		//comp, err := retrieveCompetition(ctx, tenantDB, ps.CompetitionID)
+		//if err != nil {
+		//	return fmt.Errorf("error retrieveCompetition: %w", err)
+		//}
 		psds = append(psds, PlayerScoreDetail{
-			CompetitionTitle: comp.Title,
-			Score:            ps.Score,
+			CompetitionTitle: cMap[ps.CompetitionID].Title,
+			
+			Score: ps.Score,
 		})
 	}
 
