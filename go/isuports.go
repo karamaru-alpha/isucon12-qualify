@@ -1107,7 +1107,7 @@ func competitionScoreHandler(c echo.Context) error {
 		return err
 	}
 
-	rankingCacher.Flush()
+	rankingCacher.Delete(competitionID)
 
 	return c.JSON(http.StatusOK, SuccessResult{
 		Status: true,
@@ -1310,11 +1310,6 @@ func competitionRankingHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "competition_id is required")
 	}
 
-	cache, ok := rankingCacher.Get(CACHE_KEY)
-	if ok {
-		return c.JSON(http.StatusOK, cache)
-	}
-
 	// 大会の存在確認
 	competition, err := retrieveCompetition(ctx, tenantDB, competitionID)
 	if err != nil {
@@ -1322,6 +1317,11 @@ func competitionRankingHandler(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusNotFound, "competition not found")
 		}
 		return fmt.Errorf("error retrieveCompetition: %w", err)
+	}
+
+	cache, ok := rankingCacher.Get(competitionID)
+	if ok {
+		return c.JSON(http.StatusOK, cache)
 	}
 
 	now := time.Now().Unix()
@@ -1410,7 +1410,7 @@ func competitionRankingHandler(c echo.Context) error {
 		},
 	}
 
-	rankingCacher.Set(CACHE_KEY, &res, -1)
+	rankingCacher.Set(competitionID, &res, -1)
 
 	return c.JSON(http.StatusOK, res)
 }
