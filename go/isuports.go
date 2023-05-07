@@ -1045,7 +1045,6 @@ func competitionScoreHandler(c echo.Context) error {
 			continue
 		}
 
-
 		if _, err := retrievePlayer(ctx, tenantDB, playerID); err != nil {
 			// 存在しない参加者が含まれている
 			if errors.Is(err, sql.ErrNoRows) {
@@ -1077,7 +1076,7 @@ func competitionScoreHandler(c echo.Context) error {
 			RowNum:        rowNum,
 			CreatedAt:     now,
 			UpdatedAt:     now,
-		})
+		}
 	}
 
 	tx, err := tenantDB.BeginTx(ctx, nil)
