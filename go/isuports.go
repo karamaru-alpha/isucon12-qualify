@@ -576,7 +576,7 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 	if err := tenantDB.SelectContext(
 		ctx,
 		&scoredPlayerIDs,
-		"SELECT DISTINCT(player_id) FROM player_score WHERE tenant_id = ? AND competition_id = ?",
+		"SELECT player_id FROM new_player_score WHERE tenant_id = ? AND competition_id = ?",
 		tenantID, comp.ID,
 	); err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("error Select count player_score: tenantID=%d, competitionID=%s, %w", tenantID, competitonID, err)
@@ -1113,7 +1113,7 @@ func competitionScoreHandler(c echo.Context) error {
 
 	if _, err := tx.ExecContext(
 		ctx,
-		"DELETE FROM player_score WHERE tenant_id = ? AND competition_id = ?",
+		"DELETE FROM new_player_score WHERE tenant_id = ? AND competition_id = ?",
 		v.tenantID,
 		competitionID,
 	); err != nil {
@@ -1122,16 +1122,16 @@ func competitionScoreHandler(c echo.Context) error {
 	args := make([]interface{}, 0, len(insertPlayerSet)*8)
 	placeHolders := &strings.Builder{}
 	for _, ps := range insertPlayerSet {
-		args = append(args, ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.RowNum, ps.CreatedAt, ps.UpdatedAt)
+		args = append(args, ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.CreatedAt, ps.UpdatedAt)
 		if placeHolders.Len() == 0 {
-			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?, ?, ?)")
+			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?, ?)")
 		} else {
-			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?, ?, ?)")
+			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?, ?)")
 		}
 	}
 	if _, err = tx.ExecContext(
 		ctx,
-		"INSERT INTO player_score(id, tenant_id, player_id, competition_id, score, row_num, created_at, updated_at) VALUES"+placeHolders.String(),
+		"INSERT INTO player_score(id, tenant_id, player_id, competition_id, score, created_at, updated_at) VALUES"+placeHolders.String(),
 		args...,
 	); err != nil {
 		return err
@@ -1259,7 +1259,7 @@ func playerHandler(c echo.Context) error {
 			ctx,
 			&ps,
 			// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
-			"SELECT * FROM player_score WHERE tenant_id = ? AND competition_id = ? AND player_id = ? ORDER BY row_num DESC LIMIT 1",
+			"SELECT * FROM new_player_score WHERE tenant_id = ? AND competition_id = ? AND player_id = ? LIMIT 1",
 			v.tenantID,
 			c.ID,
 			p.ID,
@@ -1286,7 +1286,7 @@ func playerHandler(c echo.Context) error {
 		//}
 		psds = append(psds, PlayerScoreDetail{
 			CompetitionTitle: cMap[ps.CompetitionID].Title,
-			
+
 			Score: ps.Score,
 		})
 	}
@@ -1395,7 +1395,7 @@ func competitionRankingHandler(c echo.Context) error {
 	if err := tenantDB.SelectContext(
 		ctx,
 		&pss,
-		"SELECT a.*, b.display_name FROM player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ? ORDER BY a.row_num DESC",
+		"SELECT a.*, b.display_name FROM new_player_score a JOIN player b ON a.player_id = b.id WHERE a.tenant_id = ? AND a.competition_id = ?",
 		tenant.ID,
 		competitionID,
 	); err != nil {
