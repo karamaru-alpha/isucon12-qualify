@@ -1265,7 +1265,7 @@ func playerHandler(c echo.Context) error {
 	}
 	scoreMap := make(map[string]*PlayerScoreRow, len(pss))
 	for _, p := range pss {
-		scoreMap[p.CompetitionID] = p
+		scoreMap[p.CompetitionID] = &p
 	}
 
 	cMap := make(map[string]CompetitionRow, len(cs))
