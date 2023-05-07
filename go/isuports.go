@@ -1261,7 +1261,7 @@ func playerHandler(c echo.Context) error {
 		v.tenantID,
 		p.ID,
 	); err != nil {
-		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, playerID=%s, %w", v.tenantID, c.ID, p.ID, err)
+		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, playerID=%s, %w", v.tenantID, "", p.ID, err)
 	}
 
 	cMap := make(map[string]CompetitionRow, len(cs))
