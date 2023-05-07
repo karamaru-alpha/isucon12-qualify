@@ -1085,18 +1085,22 @@ func competitionScoreHandler(c echo.Context) error {
 	); err != nil {
 		return fmt.Errorf("error Delete player_score: tenantID=%d, competitionID=%s, %w", v.tenantID, competitionID, err)
 	}
-	for _, ps := range playerScoreRows {
-		if _, err := tx.ExecContext(
-			ctx,
-			"INSERT INTO player_score (id, tenant_id, player_id, competition_id, score, row_num, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-			ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.RowNum, ps.CreatedAt, ps.UpdatedAt,
-		); err != nil {
-			return fmt.Errorf(
-				"error Insert player_score: id=%s, tenant_id=%d, playerID=%s, competitionID=%s, score=%d, rowNum=%d, createdAt=%d, updatedAt=%d, %w",
-				ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.RowNum, ps.CreatedAt, ps.UpdatedAt, err,
-			)
-
+	args := make([]interface{}, 0, len(playerScoreRows)*8)
+	placeHolders := &strings.Builder{}
+	for i, ps := range playerScoreRows {
+		args = append(args, ps.ID, ps.TenantID, ps.PlayerID, ps.CompetitionID, ps.Score, ps.RowNum, ps.CreatedAt, ps.UpdatedAt)
+		if i == 0 {
+			placeHolders.WriteString(" (?, ?, ?, ?, ?, ?, ?, ?)")
+		} else {
+			placeHolders.WriteString(",(?, ?, ?, ?, ?, ?, ?, ?)")
 		}
+	}
+	if _, err = tx.ExecContext(
+		ctx,
+		"INSERT INTO player_score(id, tenant_id, player_id, competition_id, score, row_num, created_at, updated_at) VALUES"+placeHolders.String(),
+		args...,
+	); err != nil {
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {
