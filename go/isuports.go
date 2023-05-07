@@ -1257,11 +1257,15 @@ func playerHandler(c echo.Context) error {
 		ctx,
 		&pss,
 		// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
-		"SELECT * FROM player_score WHERE tenant_id = ? AND player_id = ? ORDER BY row_num DESC",
+		"SELECT * FROM player_score WHERE tenant_id = ? AND player_id = ?",
 		v.tenantID,
 		p.ID,
 	); err != nil {
 		return fmt.Errorf("error Select player_score: tenantID=%d, competitionID=%s, playerID=%s, %w", v.tenantID, "", p.ID, err)
+	}
+	scoreMap := make(map[string]*PlayerScoreRow, len(pss))
+	for _, p := range pss {
+		scoreMap[p.CompetitionID] = p
 	}
 
 	cMap := make(map[string]CompetitionRow, len(cs))
@@ -1270,10 +1274,14 @@ func playerHandler(c echo.Context) error {
 	}
 
 	psds := make([]PlayerScoreDetail, 0, len(pss))
-	for _, ps := range pss {
+	for _, c := range cs {
+		v, ok := scoreMap[c.ID]
+		if !ok {
+			continue
+		}
 		psds = append(psds, PlayerScoreDetail{
-			CompetitionTitle: cMap[ps.CompetitionID].Title,
-			Score:            ps.Score,
+			CompetitionTitle: cMap[c.ID].Title,
+			Score:            v.Score,
 		})
 	}
 
