@@ -1257,7 +1257,7 @@ func playerHandler(c echo.Context) error {
 		ctx,
 		&pss,
 		// 最後にCSVに登場したスコアを採用する = row_numが一番大きいもの
-		"SELECT * FROM player_score WHERE tenant_id = ? AND player_id = ?",
+		"SELECT * FROM player_score WHERE tenant_id = ? AND player_id = ? ORDER BY row_num DESC",
 		v.tenantID,
 		p.ID,
 	); err != nil {
@@ -1271,10 +1271,6 @@ func playerHandler(c echo.Context) error {
 
 	psds := make([]PlayerScoreDetail, 0, len(pss))
 	for _, ps := range pss {
-		//comp, err := retrieveCompetition(ctx, tenantDB, ps.CompetitionID)
-		//if err != nil {
-		//	return fmt.Errorf("error retrieveCompetition: %w", err)
-		//}
 		psds = append(psds, PlayerScoreDetail{
 			CompetitionTitle: cMap[ps.CompetitionID].Title,
 			Score:            ps.Score,
