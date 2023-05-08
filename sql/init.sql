@@ -13,3 +13,13 @@ CREATE TABLE `latest_visit_history` (
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
 
 INSERT INTO `latest_visit_history` SELECT tenant_id, competition_id, player_id, created_at FROM init_latest_visit_history;
+
+
+DELETE FROM `competition`;
+INSERT INTO `competition` SELECT * FROM `init_competition`;
+
+DELETE FROM `player`;
+INSERT INTO `player` SELECT * FROM `init_player`;
+
+DELETE FROM `player_score`;
+INSERT INTO `player_score` SELECT * FROM `init_player_score`;
