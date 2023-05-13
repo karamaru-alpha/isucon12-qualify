@@ -95,7 +95,8 @@ func connectAdminDB() (*sqlx.DB, error) {
 // テナントDBのパスを返す
 func tenantDBPath(id int64) string {
 	tenantDBDir := getEnv("ISUCON_TENANT_DB_DIR", "../tenant_db")
-	return filepath.Join(tenantDBDir, fmt.Sprintf("%d.db", id))
+	//return filepath.Join(tenantDBDir, fmt.Sprintf("%d.db", id))
+	return filepath.Join(tenantDBDir, "merged.db")
 }
 
 // テナントDBに接続する
@@ -110,12 +111,12 @@ func connectToTenantDB(id int64) (*sqlx.DB, error) {
 
 // テナントDBを新規に作成する
 func createTenantDB(id int64) error {
-	p := tenantDBPath(id)
-
-	cmd := exec.Command("sh", "-c", fmt.Sprintf("sqlite3 %s < %s", p, tenantDBSchemaFilePath))
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to exec sqlite3 %s < %s, out=%s: %w", p, tenantDBSchemaFilePath, string(out), err)
-	}
+	//p := tenantDBPath(id)
+	//
+	//cmd := exec.Command("sh", "-c", fmt.Sprintf("sqlite3 %s < %s", p, tenantDBSchemaFilePath))
+	//if out, err := cmd.CombinedOutput(); err != nil {
+	//	return fmt.Errorf("failed to exec sqlite3 %s < %s, out=%s: %w", p, tenantDBSchemaFilePath, string(out), err)
+	//}
 	return nil
 }
 
