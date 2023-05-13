@@ -14,6 +14,7 @@ services:
       - /home/isucon/webapp/public.pem:/home/isucon/webapp/public.pem:ro
       - /home/isucon/initial_data:/home/isucon/initial_data
       - /home/isucon/new_data:/home/isucon/new_data
+      - /home/isucon/merged_data:/home/isucon/merged_data
       - /home/isucon/tmp:/home/isucon/tmp
       - /var/log/go.log:/var/log/go.log
       - /var/log/nginx/access.log:/var/log/nginx/access.log

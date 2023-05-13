@@ -18,4 +18,4 @@ mysql -u"$ISUCON_DB_USER" \
 
 # SQLiteのデータベースを初期化
 rm -f ../tenant_db/*.db
-cp -r ../../new_data/*.db ../tenant_db/
+cp -r ../../merged_data/*.db ../tenant_db/
