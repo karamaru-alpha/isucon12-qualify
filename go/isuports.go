@@ -560,8 +560,9 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 			"SELECT * FROM billing_report WHERE tenent_id = ? AND competiton_id = ?",
 			tenantID, competitonID,
 		); err != nil {
-			return &dest, nil
+			return nil, err
 		}
+		return &dest, nil
 	}
 
 	// ランキングにアクセスした参加者のIDを取得する
