@@ -522,6 +522,7 @@ func validateTenantName(name string) error {
 }
 
 type BillingReport struct {
+	TenantID          string `json:"tenant_id"`
 	CompetitionID     string `json:"competition_id"`
 	CompetitionTitle  string `json:"competition_title"`
 	PlayerCount       int64  `json:"player_count"`        // スコアを登録した参加者数
@@ -549,6 +550,18 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 	comp, err := retrieveCompetition(ctx, tenantDB, competitonID)
 	if err != nil {
 		return nil, fmt.Errorf("error retrieveCompetition: %w", err)
+	}
+	
+	if comp.FinishedAt.Valid {
+		var dest BillingReport
+		if err := adminDB.GetContext(
+			ctx,
+			&dest,
+			"SELECT * FROM billing_report WHERE tenent_id = ? AND competiton_id = ?",
+			tenantID, competitonID,
+		); err != nil {
+			return &dest, nil
+		}
 	}
 
 	// ランキングにアクセスした参加者のIDを取得する
@@ -978,6 +991,19 @@ func competitionFinishHandler(c echo.Context) error {
 			now, now, id, err,
 		)
 	}
+
+	report, err := billingReportByCompetition(ctx, tenantDB, v.tenantID, id)
+	if err != nil {
+		return err
+	}
+	if _, err := adminDB.ExecContext(
+		ctx,
+		"INSERT INTO billing_report (tenant_id, competition_id, competition_title, player_count, visitor_count, billing_player_yen, billing_visitor_yen, billing_yen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		v.tenantID, report.CompetitionID, report.CompetitionTitle, report.PlayerCount, report.VisitorCount, report.BillingPlayerYen, report.BillingVisitorYen, report.BillingYen,
+	); err != nil {
+		return err
+	}
+
 	return c.JSON(http.StatusOK, SuccessResult{Status: true})
 }
 

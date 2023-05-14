@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS `tenant`;
 DROP TABLE IF EXISTS `id_generator`;
 DROP TABLE IF EXISTS `visit_history`;
 DROP TABLE IF EXISTS `latest_visit_history`;
+DROP TABLE IF EXISTS `billing_report`;
 
 CREATE TABLE `tenant` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
@@ -45,4 +46,16 @@ CREATE TABLE `init_latest_visit_history` (
      `player_id` VARCHAR(255) NOT NULL,
      `created_at` BIGINT NOT NULL,
      PRIMARY KEY (`tenant_id`, `competition_id`, `player_id`)
+) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
+
+CREATE TABLE `billing_report` (
+    `tenant_id` BIGINT UNSIGNED NOT NULL,
+    `competition_id` VARCHAR(255) NOT NULL,
+    `competition_title` VARCHAR(255) NOT NULL,
+    `player_count` INT NOT NULL,
+    `visitor_count` INT NOT NULL,
+    `billing_player_yen` INT NOT NULL,
+    `billing_visitor_yen` INT NOT NULL,
+    `billing_yen` INT NOT NULL,
+    PRIMARY KEY (`tenant_id`, `competition_id`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4;
