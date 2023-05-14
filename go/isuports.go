@@ -557,7 +557,7 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 		if err := adminDB.GetContext(
 			ctx,
 			&dest,
-			"SELECT * FROM billing_report WHERE tenent_id = ? AND competiton_id = ?",
+			"SELECT * FROM billing_report WHERE tenant_id = ? AND competiton_id = ?",
 			tenantID, competitonID,
 		); err != nil {
 			return nil, err
