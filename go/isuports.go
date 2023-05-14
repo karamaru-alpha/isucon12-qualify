@@ -522,14 +522,14 @@ func validateTenantName(name string) error {
 }
 
 type BillingReport struct {
-	TenantID          string `json:"tenant_id"`
-	CompetitionID     string `json:"competition_id"`
-	CompetitionTitle  string `json:"competition_title"`
-	PlayerCount       int64  `json:"player_count"`        // スコアを登録した参加者数
-	VisitorCount      int64  `json:"visitor_count"`       // ランキングを閲覧だけした(スコアを登録していない)参加者数
-	BillingPlayerYen  int64  `json:"billing_player_yen"`  // 請求金額 スコアを登録した参加者分
-	BillingVisitorYen int64  `json:"billing_visitor_yen"` // 請求金額 ランキングを閲覧だけした(スコアを登録していない)参加者分
-	BillingYen        int64  `json:"billing_yen"`         // 合計請求金額
+	TenantID          string `json:"-" db:"tenant_id"`
+	CompetitionID     string `json:"competition_id" db:"competition_id"`
+	CompetitionTitle  string `json:"competition_title" db:"competition_title"`
+	PlayerCount       int64  `json:"player_count" db:"player_count"`               // スコアを登録した参加者数
+	VisitorCount      int64  `json:"visitor_count" db:"visitor_count"`             // ランキングを閲覧だけした(スコアを登録していない)参加者数
+	BillingPlayerYen  int64  `json:"billing_player_yen" db:"billing_player_yen"`   // 請求金額 スコアを登録した参加者分
+	BillingVisitorYen int64  `json:"billing_visitor_yen" db:"billing_visitor_yen"` // 請求金額 ランキングを閲覧だけした(スコアを登録していない)参加者分
+	BillingYen        int64  `json:"billing_yen" db:"billing_yen"`                 // 合計請求金額
 }
 
 type VisitHistoryRow struct {
@@ -551,7 +551,7 @@ func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID i
 	if err != nil {
 		return nil, fmt.Errorf("error retrieveCompetition: %w", err)
 	}
-	
+
 	if comp.FinishedAt.Valid {
 		var dest BillingReport
 		if err := adminDB.GetContext(
