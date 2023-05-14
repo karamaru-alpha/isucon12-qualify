@@ -547,19 +547,17 @@ type VisitHistorySummaryRow struct {
 
 // 大会ごとの課金レポートを計算する
 func billingReportByCompetition(ctx context.Context, tenantDB dbOrTx, tenantID int64, competitonID string) (*BillingReport, error) {
-	var dest *BillingReport
+	var dest BillingReport
 	if err := adminDB.SelectContext(
 		ctx,
-		dest,
-		"SELECT * FROM billing_report WHERE tenant_id = ? AND competition_id = ?",
+		&dest,
+		"SELECT * FROM billing_report WHERE tenant_id = ? AND competition_id = ? LIMIT 1",
 		tenantID, competitonID,
-	); err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			return nil, err
-		}
+	); err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, err
 	}
-	if dest != nil {
-		return dest, nil
+	if dest.CompetitionID != "" {
+		return &dest, nil
 	}
 
 	comp, err := retrieveCompetition(ctx, tenantDB, competitonID)
